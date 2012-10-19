@@ -8,3 +8,6 @@ all: $(MOD_OBJS)
 
 variables_mod.o: variables_mod.f90
 	$(CC) $(OPT) -c variables_mod.f90
+
+clean:
+	rm *.mod *.o *_exe *~
