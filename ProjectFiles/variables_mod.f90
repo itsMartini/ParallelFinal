@@ -44,5 +44,5 @@ contains
     double precision, intent(in) :: mu, phi_prime, sigma
     mu_twiddle = dcmplx(sigma*mu/(2.d0*pi), -1.d0*phi_prime*mu/(2.d0*pi))
   end function mu_twiddle
-  
+
 end module variables_mod
