@@ -15,6 +15,7 @@ program driver
   write (*,*) 'actual u: ', little_u1
   write (*,*) 'calculated u: ', var_big_u1
   write (*,*) 'epsilon: ', var_epsilon1
-
+  
   call table5()
+  call table6()
 end program driver
