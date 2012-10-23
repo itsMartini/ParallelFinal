@@ -1,8 +1,8 @@
 CC = gfortran
 OPT = -O3
-MODS = variables_mod.mod solutions_mod.mod w_mod.mod
-MOD_OBJS = variables_mod.o solutions_mod.o w_mod.o
-F90 = variables_mod.f90 solutions_mod.f90 w_mod.f90 driver.f90
+MODS = variables_mod.mod solutions_mod.mod w_mod.mod output_mod.mod
+MOD_OBJS = variables_mod.o solutions_mod.o w_mod.o output_mod.o
+F90 = variables_mod.f90 solutions_mod.f90 w_mod.f90 output_mod.f90 driver.f90
 OBJS = driver.o
 
 all: $(MOD_OBJS) $(OBJS)
@@ -16,6 +16,9 @@ solutions_mod.o: solutions_mod.f90
 
 w_mod.o: w_mod.f90
 	$(CC) $(OPT) -c w_mod.f90
+
+output_mod.o: output_mod.f90
+	$(CC) $(OPT) -c output_mod.f90
 
 driver.o: driver.f90
 	$(CC) $(OPT) -c driver.f90
