@@ -43,11 +43,11 @@ contains
   
   double precision function epsilon(lu, bu)
     double precision, intent(in) :: lu, bu
-    epsilon = abs(lu-bu)
+    epsilon = dabs(lu-bu)
   end function epsilon
   
   double precision function rho(epsilon_N, epsilon_N2)
     double precision, intent(in) :: epsilon_N, epsilon_N2
-    rho = log(epsilon_N2/epsilon_N)/log(2.d0)
+    rho = dlog(epsilon_N2/epsilon_N)/dlog(2.d0)
   end function rho
 end module solutions_mod
