@@ -40,12 +40,12 @@ contains
     temp_u = temp_u/(N*tau)
     big_u = 2.d0*realpart(temp_u)
   end function big_u
-  
+
   double precision function epsilon(lu, bu)
     double precision, intent(in) :: lu, bu
     epsilon = dabs(lu-bu)
   end function epsilon
-  
+
   double precision function rho(epsilon_N, epsilon_N2)
     double precision, intent(in) :: epsilon_N, epsilon_N2
     rho = dlog(epsilon_N2/epsilon_N)/dlog(2.d0)
