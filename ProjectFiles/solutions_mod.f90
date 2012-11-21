@@ -69,26 +69,26 @@ contains
     complex(kind=8), dimension(1:m-1), intent(inout) :: w
     double precision, dimension(1:m-1), intent(inout) :: x_vect
     double precision, dimension(1:m-1) :: big_u_vect
-    
+
     complex(kind=8), dimension(1:m-1) :: temp_u
-    
+
     double precision :: var_eta, var_y
     complex(kind=8) :: var_z
-    
+
     integer :: j
-    
+
     temp_u = dcmplx(0, 0)
-    
+
     var_eta = eta(0, N)
     var_y = y(var_eta, tau)
     var_z = z(phi(var_y, gamma, nu), var_y, sigma)
-    
+
     temp_u = temp_u+summand_vect(t, w, 0, N, m, tau, nu, sigma, gamma, var_eta, var_y, var_z)/2.d0
     do j = 1, N-1
        var_eta = eta(j, N)
        var_y = y(var_eta, tau)
        var_z = z(phi(var_y, gamma, nu), var_y, sigma)
-       
+
        call fdiff_ode_solve(w, var_z, g_3, 0.d0, PI, 0.d0, 0.d0, m, t, .true., x_vect)
 
        temp_u = temp_u+summand_vect(t, w, j, N, m, tau, nu, sigma, gamma, var_eta, var_y, var_z)
@@ -97,7 +97,7 @@ contains
     temp_u = temp_u/(N*tau)
     big_u_vect = 2.d0*realpart(temp_u)
   end function big_u_vect
-  
+
   double precision function epsilon(lu, bu)
     double precision, intent(in) :: lu, bu
     epsilon = dabs(lu-bu)

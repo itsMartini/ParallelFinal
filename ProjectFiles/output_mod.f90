@@ -102,9 +102,9 @@ contains
        else
           t = dble(temp-8)
        end if
-       
+
        little_u = u_1(t)
-       
+
        do i = 0, 3
           N = 10*2**i
           var_big_u(i) = big_u(t, N, 0.5d0, 0.5d0, 1.d0, 0.5d0, w_1)
@@ -113,11 +113,11 @@ contains
              var_rho(i) = rho(var_epsilon(i), var_epsilon(i-1))
           end if
        end do
-       
+
        write (3,7) t, var_epsilon(0), var_epsilon(1), var_rho(1), var_epsilon(2),&
             var_rho(2), var_epsilon(3), var_rho(3)
     end do
-    
+
     close(3)
   end subroutine table7
 

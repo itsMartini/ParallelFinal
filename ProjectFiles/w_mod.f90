@@ -22,7 +22,7 @@ contains
     integer :: m
     double precision, dimension(1:m-1), intent(in) :: x_vect
     double precision, dimension(1:m-1) :: u_3
-    
+
     u_3 = (1.d0+t)*exp(-1.d0*t)*sin(x_vect)+cos(t)*exp(-2.d0*t)*sin(2.d0*x_vect)
   end function u_3
 end module w_mod
