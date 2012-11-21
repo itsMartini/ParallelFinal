@@ -34,12 +34,12 @@ contains
     double precision, intent(in) :: y, nu
     phi_prime = -1.d0*y/dsqrt(y**2.d0+nu**2.d0)
   end function phi_prime
-
+  
   complex(kind=8) function z(phi, y, sigma)
     double precision, intent(in) :: phi, y, sigma
     z = dcmplx(phi, sigma*y)
   end function z
-
+  
   complex(kind=8) function mu_twiddle(mu, phi_prime, sigma)
     double precision, intent(in) :: mu, phi_prime, sigma
     mu_twiddle = dcmplx(sigma*mu/(2.d0*pi), -1.d0*phi_prime*mu/(2.d0*pi))
