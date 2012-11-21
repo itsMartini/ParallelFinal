@@ -1,7 +1,7 @@
 module variables_mod
   implicit none
   
-  double precision, parameter :: pi = acos(-1.d0)
+  double precision, parameter :: PI = acos(-1.d0)
   
 contains
   
@@ -42,7 +42,7 @@ contains
   
   complex(kind=8) function mu_twiddle(mu, phi_prime, sigma)
     double precision, intent(in) :: mu, phi_prime, sigma
-    mu_twiddle = dcmplx(sigma*mu/(2.d0*pi), -1.d0*phi_prime*mu/(2.d0*pi))
+    mu_twiddle = dcmplx(sigma*mu/(2.d0*PI), -1.d0*phi_prime*mu/(2.d0*PI))
   end function mu_twiddle
-
+  
 end module variables_mod
