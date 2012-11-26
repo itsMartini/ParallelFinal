@@ -55,7 +55,7 @@ contains
     double precision, intent(in) :: x, t
     g_3 = exp(-t)*sin(x)+exp(-2.d0*t)*(2.d0*cos(t)-sin(t))*sin(2.d0*x)
   end function g_3
-  
+
   !example 3 transformed function
   complex(kind=8) function g_3_z(x, z)
     double precision, intent(in) :: x
