@@ -3,6 +3,7 @@ module output_mod
   use solutions_mod
   use w_mod
   use ode_solver_mod
+  use mpi
   implicit none
 
   double precision :: t, little_u
@@ -112,18 +113,21 @@ contains
              var_rho(i) = rho(var_epsilon(i), var_epsilon(i-1))
           end if
        end do
-       
+
        write (3,7) t, var_epsilon(0), var_epsilon(1), var_rho(1), var_epsilon(2),&
             var_rho(2), var_epsilon(3), var_rho(3)
     end do
-    
+
     close(3)
   end subroutine table7
-  
-  subroutine table8()
+
+  subroutine table8(my_rank, num_cores, MPI_DOUBLE_COMPLEX, MPI_COMM_WORLD, MPI_SUM)
+    integer, intent(in) :: my_rank, num_cores, MPI_DOUBLE_COMPLEX, MPI_COMM_WORLD, MPI_SUM
+    
     double precision, allocatable, dimension(:) :: var_big_u_vect, var_epsilon_vect
     double precision, allocatable, dimension(:) :: little_u_vect, x_vect
     integer :: j
+    integer, parameter :: MASTER = 0
     
 8   format(1A2, 1A9, 2A11, 1A8, 1A11, 1A8, 1A11)
 9   format(1F3.1, 2ES11.3, 1F8.2, 1ES11.3, 1F8.2, 1ES11.3, 1F8.2)
@@ -146,25 +150,31 @@ contains
           allocate(little_u_vect(1:m-1), x_vect(1:m-1))
           allocate(var_big_u_vect(1:m-1), var_epsilon_vect(1:m-1))
           
-          var_big_u_vect = big_u_vect(t, N, m, 0.5d0, 0.5d0, 1.d0, 0.5d0, x_vect, g_3_z, 0.d0, PI, 0.d0, 0.d0)
-          little_u_vect = u_3(x_vect, t, m)
+          var_big_u_vect = big_u_vect(t, N, m, 0.5d0, 0.5d0, 1.d0, 0.5d0, x_vect,&
+               g_3_z, 0.d0, PI, 0.d0, 0.d0, my_rank, num_cores, MPI_DOUBLE_COMPLEX, MPI_COMM_WORLD, MPI_SUM)
           
-          do j = 1, m-1
-             var_epsilon_vect(j) = epsilon(little_u_vect(j), var_big_u_vect(j))
-          end do
-
-          var_epsilon(i) = maxval(var_epsilon_vect)
-
-          if (i > 0) then
-             var_rho(i) = rho(var_epsilon(i), var_epsilon(i-1))
+          if (my_rank == MASTER) then
+             little_u_vect = u_3(x_vect, t, m)
+             
+             do j = 1, m-1
+                var_epsilon_vect(j) = epsilon(little_u_vect(j), var_big_u_vect(j))
+             end do
+             
+             var_epsilon(i) = maxval(var_epsilon_vect)
+             
+             if (i > 0) then
+                var_rho(i) = rho(var_epsilon(i), var_epsilon(i-1))
+             end if
           end if
-
+          
           deallocate(little_u_vect, x_vect, var_big_u_vect, var_epsilon_vect)
        end do
-
-       write (4,9) t, var_epsilon(0), var_epsilon(1), var_rho(1), var_epsilon(2),&
-            var_rho(2), var_epsilon(3), var_rho(3)
        
+       if (my_rank == MASTER) then
+          write (4,9) t, var_epsilon(0), var_epsilon(1), var_rho(1), var_epsilon(2),&
+               var_rho(2), var_epsilon(3), var_rho(3)
+       end if
+
     end do
 
     close(4)

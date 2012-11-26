@@ -1,4 +1,4 @@
-CC = gfortran
+CC = mpif90
 OPT = -O3
 LIB = -llapack
 MODS = variables_mod.mod ode_solver_mod.mod solutions_mod.mod w_mod.mod output_mod.mod
