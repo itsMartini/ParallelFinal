@@ -19,7 +19,7 @@ contains
   
   function u_3(x_vect, t, m)
     double precision, intent(in) :: t
-    integer :: m
+    integer, intent(in) :: m
     double precision, dimension(1:m-1), intent(in) :: x_vect
     double precision, dimension(1:m-1) :: u_3
 

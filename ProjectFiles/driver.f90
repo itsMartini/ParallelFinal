@@ -7,7 +7,7 @@ program driver
   implicit none
   
   double precision :: var_big_u1, little_u1, var_epsilon1
-
+  
   !testing
   integer, parameter :: W_SIZE = 5
   complex(kind=8), dimension(1:W_SIZE-1) :: w_test
@@ -31,12 +31,10 @@ program driver
   
   !example 3 table
   call table8()
-
-  x_vect = (/ .2,.4,.6,.8 /)
   
   !test
-  call fdiff_ode_solve(w_test, dcmplx(0.d0, 0.d0), fun, 0.d0, 1.d0, 0.d0, 1.d0, W_SIZE, 0.d0, .FALSE., x_vect)
+  call fdiff_ode_solve(w_test, dcmplx(0.d0, 0.d0), fn, 0.d0, 1.d0, 0.d0, 1.d0, W_SIZE, 0.d0, .FALSE., x_vect)
   write (*,*)
   write (*,*)
   write (*,*) realpart(w_test)
-end program
+end program driver
