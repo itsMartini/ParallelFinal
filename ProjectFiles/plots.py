@@ -60,8 +60,11 @@ plt.show()
 
 ##### SPEEDUP #########################
 
-temp_mio = np.log2(mio[0,1]/mio[:,1])
-temp_sayers = np.log2(sayers[0,1]/sayers[:,1])
+speedup_mio = mio[0,1]/mio[:,1]
+speedup_sayers = sayers[0,1]/sayers[:,1]
+
+temp_mio = np.log2(speedup_mio)
+temp_sayers = np.log2(speedup_sayers)
 
 plt.plot(np.log2(mio[:,0]), temp_mio, "r*-", label="Mio")
 plt.plot(np.log2(sayers[:,0]), temp_sayers, "bo-", label="Sayers")
@@ -89,80 +92,99 @@ plt.ylabel("Efficiency")
 plt.legend(loc=1)
 plt.show()
 
-def u(x, t):
-	return (1+t)*np.exp(-t)*np.sin(x) + np.cos(t)*np.exp(-2*t)*np.sin(2*x)
+
+##### Experimental Serial Fraction ###
+
+temp_mio = (1/speedup_mio[1:(len(speedup_mio))] - 1/mio[1:(len(mio)),0])/(1 - 1/mio[1:(len(mio)),0])
+temp_sayers = (1/speedup_sayers[1:(len(speedup_sayers))] - 1/sayers[1:(len(sayers)),0])/(1 - 1/sayers[1:(len(sayers)),0])
+
+plt.plot(np.log2(mio[1:len(mio),0]), temp_mio, "r*-", label="Mio")
+plt.plot(np.log2(sayers[1:len(sayers):,0]), temp_sayers, "bo-", label="Sayers")
+
+plt.title("Number of Cores Vs. Experimental Serial Fraction \nfor n = 50,000 and m = 250,000")
+plt.xlabel("lg(Number of Cores)")
+plt.ylabel("Experimental Serial Fraction")
+
+plt.legend(loc=1)
+plt.show()
+
+
+##### Function Plots #################
 
 # def u(x, t):
-# return (1+t)*np.exp(-t)*np.sin(x) + np.cos(t)*np.exp(-2*t)*np.sin(2*x)
+# 	return (1+t)*np.exp(-t)*np.sin(x) + np.cos(t)*np.exp(-2*t)*np.sin(2*x)
 
-big_u_values_file = file("results/u_values.txt", 'r')
-t_vect = []
-x_vect = []
-u_vect = []
+# # def u(x, t):
+# # return (1+t)*np.exp(-t)*np.sin(x) + np.cos(t)*np.exp(-2*t)*np.sin(2*x)
 
-while 1:
-	t = big_u_values_file.readline()
-	if len(t) == 0:
-		break
+# big_u_values_file = file("results/u_values.txt", 'r')
+# t_vect = []
+# x_vect = []
+# u_vect = []
 
-	t_vect.append(float(t))
+# while 1:
+# 	t = big_u_values_file.readline()
+# 	if len(t) == 0:
+# 		break
 
-	t = big_u_values_file.readline().split()
+# 	t_vect.append(float(t))
 
-	x_vect2 = []
-	for x in t:
-		x_vect2.append(float(x))
-	x_vect.append(x_vect2)
+# 	t = big_u_values_file.readline().split()
 
-	t = big_u_values_file.readline().split()
+# 	x_vect2 = []
+# 	for x in t:
+# 		x_vect2.append(float(x))
+# 	x_vect.append(x_vect2)
 
-	u_vect2 = []
-	for x in t:
-		u_vect2.append(float(x))
-	u_vect.append(u_vect2)
+# 	t = big_u_values_file.readline().split()
 
-big_u_values_file.close()
+# 	u_vect2 = []
+# 	for x in t:
+# 		u_vect2.append(float(x))
+# 	u_vect.append(u_vect2)
 
-# fig = plt.figure()
-# ax = fig.gca(projection='3d')
-fig = pylab.figure()
+# big_u_values_file.close()
 
-#ax = Axes3D(fig)
-ax = fig.add_subplot(1, 2, 1, projection='3d')
-ax.set_autoscale_on(False)
-ax.set_xlim3d(0,pi)
-ax.set_ylim3d(0,4)
-ax.set_zlim3d(-.15,1.5)
+# # fig = plt.figure()
+# # ax = fig.gca(projection='3d')
+# fig = pylab.figure()
 
-x_values = np.arange(0, pi+pi/380, pi/380)
-t_values = np.arange(.2, 4, .01)
+# #ax = Axes3D(fig)
+# ax = fig.add_subplot(1, 2, 1, projection='3d')
+# ax.set_autoscale_on(False)
+# ax.set_xlim3d(0,pi)
+# ax.set_ylim3d(0,4)
+# ax.set_zlim3d(-.15,1.5)
 
-x_values, t_values = np.meshgrid(x_values, t_values)
-u_values = u(x_values, t_values)
-ax.plot_surface(x_values, t_values, u_values, linewidth=0.3, cmap=cm.jet)
+# x_values = np.arange(0, pi+pi/380, pi/380)
+# t_values = np.arange(.2, 4, .01)
 
-ax.set_title("Actual u")
-ax.set_xlabel("x")
-ax.set_ylabel("t")
-ax.set_zlabel("u(x,t)")
+# x_values, t_values = np.meshgrid(x_values, t_values)
+# u_values = u(x_values, t_values)
+# ax.plot_surface(x_values, t_values, u_values, linewidth=0.3, cmap=cm.jet)
 
-ax = fig.add_subplot(1, 2, 2, projection='3d')
-ax.set_autoscale_on(False)
-ax.set_xlim3d(0,pi)
-ax.set_ylim3d(0,4)
-ax.set_zlim3d(-.15,1.5)
+# ax.set_title("Actual u")
+# ax.set_xlabel("x")
+# ax.set_ylabel("t")
+# ax.set_zlabel("u(x,t)")
 
-x_vect2, t_vect = np.meshgrid(x_vect2, t_vect)
-u_vect = np.array(u_vect)
+# ax = fig.add_subplot(1, 2, 2, projection='3d')
+# ax.set_autoscale_on(False)
+# ax.set_xlim3d(0,pi)
+# ax.set_ylim3d(0,4)
+# ax.set_zlim3d(-.15,1.5)
 
-ax.plot_surface(x_vect2, t_vect, u_vect, linewidth=0.3, cstride=1, cmap=cm.jet)
+# x_vect2, t_vect = np.meshgrid(x_vect2, t_vect)
+# u_vect = np.array(u_vect)
 
-ax.set_title("Approximate u with n=20, m=24")
-ax.set_xlabel("x")
-ax.set_ylabel("t")
-ax.set_zlabel("u(x,t)")
+# ax.plot_surface(x_vect2, t_vect, u_vect, linewidth=0.3, cstride=1, cmap=cm.jet)
 
-plt.show()
+# ax.set_title("Approximate u with n=20, m=24")
+# ax.set_xlabel("x")
+# ax.set_ylabel("t")
+# ax.set_zlabel("u(x,t)")
+
+# plt.show()
 
 
 ##### GENERATE MOVIE #####################################
