@@ -82,8 +82,8 @@ program driver
   open(unit=50, file="results/u_values.txt", iostat=ierror, status="unknown", action="write")
     if ( ierror /= 0 ) stop "Error opening results/u_values.txt"
   
-  n_ = 2
-  m_ = 5
+  n_ = 20
+  m_ = 24
 
   allocate(var_big_u_vect(1:m_-1), x_vect(1:m_-1))
 
