@@ -7,6 +7,8 @@
 \usecolortheme{seahorse}
 \usepackage{amsmath, amsfonts, amssymb, amsthm}
 \usepackage{graphicx}
+\usepackage{movie15}
+\usepackage{hyperref}
 
 \def\e{\text{e}}
 \def\L{\mathcal{L}}
@@ -95,6 +97,9 @@
 	
 	\frame{\frametitle{Actual Solution}
 		$$u(x,t)=(1+t)\e^{-t}\sin(x)+\cos(t)\e^{-2t}\sin(2x)$$
+		\begin{figure}
+			\movie[mouse, repeat]{animation.mpg}{ProjectFiles/results/movies/animation.mpg}
+		\end{figure}
 	}
 	
 	\frame{\frametitle{Results}
