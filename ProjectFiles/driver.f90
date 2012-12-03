@@ -84,7 +84,7 @@ program driver
   
   n_ = 16
   m_ = 50
-
+  
   allocate(var_big_u_vect(1:m_-1), x_vect(1:m_-1))
   
   do i = 1, 380, 1
@@ -96,7 +96,7 @@ program driver
      write(50, *) 0.d0, x_vect, PI
      write(50, *) 0.d0, var_big_u_vect, 0.d0
   end do
-
+  
   deallocate(var_big_u_vect, x_vect)
 
   call mpi_finalize(ierror)
