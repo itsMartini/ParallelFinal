@@ -25,13 +25,13 @@
 		$$u_t+Au=f(t),\hspace{4mm}\text{for }t>0,\hspace{4mm}\text{with }u(0)=u_0$$ \\\vspace{1cm}
 		where $A$ is the second-order differential operator ($\nabla^2$) \\
 		and $u_0$ and $f(t)$ are given. \\\vspace{1cm}
-		i.e. The heat equation...
+		i.e. The heat equation... \\\vspace{1cm}
+		Note: all functions above have implied spatial terms based on the dimensionality of the problem
 	}
 	
 	\frame{\frametitle{The Transformed Problem}
 		$$(zI+A)w(z)=u_0+\hat{f}(z)$$ \\\vspace{1cm}
-		where $z$ is the transform variable, $I$ is the identity matrix, $\hat{f}(z)=\L\{f\}$, and $w(z)=\L\{u\}$. \\\vspace{1cm}
-		Note: all functions above have implied spatial terms based on the dimensionality of the problem
+		where $z$ is the transform variable, $I$ is the identity matrix, $\hat{f}(z)=\L\{f\}$, and $w(z)=\L\{u\}$. 
 	}
 	
 	\frame{\frametitle{The Solution: space}
@@ -98,7 +98,7 @@
 	\frame{\frametitle{Actual Solution}
 		$$u(x,t)=(1+t)\e^{-t}\sin(x)+\cos(t)\e^{-2t}\sin(2x)$$
 		\begin{figure}
-			\movie[mouse, repeat]{animation.mpg}{ProjectFiles/results/movies/animation.mpg}
+			\includemovie[poster, mouse, repeat, text=animation.mpg]{8cm}{6cm}{ProjectFiles/results/movies/animation.mpg}
 		\end{figure}
 	}
 	
