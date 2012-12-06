@@ -5,45 +5,54 @@
 \usepackage{graphicx}
 
 \def\e{\text{e}}
+\def\L{\mathcal{L}}
+\def\i{\text{i}}
+\def\d{\text{d}}
+\def\R{{\mathbb{R}}}
+\def\C{{\mathbb{C}}}
 
 \title{Solving parabolic PDEs in parallel via time discretization using Laplace transforms}
 \author{Kyle Geyser and Dylan Denning}
 \date{\today}
 
 \begin{document}
- \maketitle
+	\begin{titlepage}
+		\maketitle
+		
+		\vspace{3cm}
  
- % nice mathy stuff for our presentation
- 
- $$U_{N,\tau}(t)=2\text{Re}\left(\frac{1}{N\tau}\sum_{j=0}^{N-1}{}^\prime \tilde{\mu_j}\e^{z_jt}w(z_j)\right)$$
- $$(zI+A)w(z)=u_0+\hat{f}(z)$$
- $$u_t+Au=f(t),\hspace{4mm}\text{for }t>0,\hspace{4mm}\text{with }u(0)=u_0$$
- $$u_t-u_{xx}=f(x,t),\hspace{4mm}\text{for }0<x<\pi,\;t>0,$$
- $$u(x,t)=0\hspace{4mm}\text{for }x=0\text{ and }\pi,\;t>0,\hspace{4mm}\text{with }u(x,0)=u_0(x),\hspace{4mm}\text{for }0<x<\pi$$
- $$u(x,t)=(1+t)\e^{-t}\sin(x)+\cos(t)\e^{-2t}\sin(2x)$$
- $$u_0(x)=\sin(x)+\sin(2x)$$
- $$\hat{f}(x,z)=\frac{1}{1+z}\sin(x)+\frac{2z+3}{(z+2)^2+1}\sin(2x)$$
- 
- % end nice mathy stuff
+		\begin{abstract}
+			For this project, we will outline a method to solve inhomogeneous parabolic partial differential equations in parallel. This will be accomplished by removing the time dependence of the equations by transforming the problem into a differential equation in the space-frequency setting through a Laplace transformation. For each discrete frequency, an independent spatial problem exists which can be solved with a finite difference method for numerically approximating solutions to differential equations. Due to the independence of the spatial problems, many problems can be solved at the same time in a parallel environment. This paper will further explain the details required to produce accurate results for such problems.
+		\end{abstract}
+	\end{titlepage}
 	
-	\section*{Summary}
-	\hspace{5mm} In a normal space-time setting, partial differential equations can be impossible to solve using parallel methods. For each unit of time, the unknown function relies on the values at previous times. Given a parabolic PDE, one can transform the problem into many discrete, space-frequency problems, independent of one another. Following this transformation, parallel methods can be applied to solving the problem with high speed and accuracy. The methods used in this project can be applied to many fields involving differential equations in time, reducing the time needed to solve problems which previously could only be solved with a serial mentality.
-	
-	\section*{Project Description}
-	\subsection*{Aims and Background}
-	\hspace{5mm} The aim of this project is to produce a working program for numerically approximating solutions to space-time differntial equations. We will use a Laplace transform to transform the problem from temporal space into a frequency space. Aiding us in our research and development of this project is an article\cite{sheen03} written in the IMA Journal of Numerical Analysis on the subject matter. We will attempt to replicate the results gained by the authors in this article.
-	
-	\subsection*{Approach and Methodology}
-	\hspace{5mm} We will begin our studies with producing a working serial version of the algorithm for ordinary differential equations with known solutions, with which we can then compare computed results. Following successful completion of said serial algorithm, we will make the necessary adjustments as to allow for partial differential equation computations, still performing all computations in serial. Once a fully working serial version of the code is completed, we will proceed to parallelize the algorithm to produce our intended final result. By approaching the problem with this methodology, we can work in steps in which we feel comfortable. Between each step, should we need outside guidance, we can approach Dr. Ganesh with any problems we are having, while still showing that we are making progress toward a final production. Throughout the time spent working through these milestones, we can further our knowledge on the subject matter by continuing to digest more of the material in the provided article\cite{
-sheen03} as well as learn new material in the field of numerical solutions to PDEs through Dr. Ganesh's private lectures.
+	\section*{Problem Description}
+		The problems we will consider are of the form
+		$$u_t+Au=f(t),\hspace{4mm}\text{for }t>0,\hspace{4mm}\text{with }u(0)=u_0$$ \\
+		where $A$ is the second-order differential operator ($\nabla^2$) with Dirichlet boundary conditions and $u_0$ and $f(t)$ are given.
+		Note: all functions above have implied spatial terms based on the dimensionality of the problem
+
+	\section*{Approach}
+		To remove the time dependece of the problem, we transform the equation with a Laplace transform defined by
+		$$w(z):=\L\{u\}=\hat{u}(z)=\int_0^\infty\e^{-zt}u(t)\d t$$
+		To get a solution for $u$, we must take an inverse Laplace transform of $w$ defined by
+		$$u(t)=\frac{1}{2\pi\i}\int_\Gamma\e^{zt}w(z)\d z$$	
+		where $\Gamma$ is a deformed contour in the complex plane, assuming $w(z)$ can be continued analytically. 
+		$$\Gamma=\{z:z=\varphi(y)+\i\sigma y, y\in\R, y\text{ increasing}\}\subset S, S=\{z\in\C:|\arg z|<\delta, z\neq 0\}, \delta\in(\pi/2,\pi)$$
+		
+	\section*{Approach and Methodology}
+	\hspace{5mm} We will begin our studies with producing a working serial version of the algorithm for ordinary differential equations with known solutions, with which we can then compare computed results. Following successful completion of said serial algorithm, we will make the necessary adjustments as to allow for partial differential equation computations, still performing all computations in serial. Once a fully working serial version of the code is completed, we will proceed to parallelize the algorithm to produce our intended final result. By approaching the problem with this methodology, we can work in steps in which we feel comfortable. Between each step, should we need outside guidance, we can approach Dr. Ganesh with any problems we are having, while still showing that we are making progress toward a final production. Throughout the time spent working through these milestones, we can further our knowledge on the subject matter by continuing to digest more of the material in the provided article\cite{sheen03} as well as learn new material in the field of numerical solutions to PDEs through Dr. Ganesh's private lectures.
 	
 	\subsection*{Expected Outcome}
 	\hspace{5mm} Since we are replicating the process in the article by Sheen, Sloan, and Thom\'{e}e, we expect to get the same results the authors show in section 6 (Numerical examples) in their paper.\cite{sheen03}
 	
 	\subsection*{Tables and Plots}
 	
-	\begin{tabular}{r|rrrrrrr}
-		  t        &e\_10        &e\_20        &p\_20        &e\_40        &p\_40        &e\_80        &p\_80 \\ 
+	\subsubsection*{Table 1} \small\textit{Error and apparent order of convergence for Example 1 with $N=10,20,40$,\\ and $80$ for $\tau=0.5$} \\\\
+	\normalsize
+	\begin{tabular}{r||rrrrrrr}
+		\hline
+		$t$  &$\epsilon_{10}$  &$\epsilon_{20}$  &$\rho_{20}$  &$\epsilon_{40}$  &$\rho_{40}$  &$\epsilon_{80}$  &$\rho_{80}$ \\ 
 		\hline
 		0.2    &3.715E-04    &2.018E-04         &0.88    &3.574E-04        &-0.82    &3.451E-04         &0.05 \\ 
 		0.4    &4.808E-04    &1.654E-04         &1.54    &3.972E-05         &2.06    &1.710E-06         &4.54 \\ 
@@ -57,12 +66,15 @@ sheen03} as well as learn new material in the field of numerical solutions to PD
 		2.0    &2.305E-05    &7.890E-09        &11.51    &1.221E-10         &6.01    &5.444E-12         &4.49 \\ 
 		3.0    &9.117E-05    &2.193E-08        &12.02    &1.247E-13        &17.42    &6.523E-16         &7.58 \\ 
 		4.0    &2.640E-04    &6.540E-08        &11.98    &5.787E-15        &23.43    &6.939E-18         &9.70 \\ 
+		\hline
 	\end{tabular}
 	
-	\begin{tabular}{r|rrr|rrr}
-							 &Tau = 0.25   &						 &						 &Tau = 1.0		 &						 &		  \\
+	\subsubsection*{Table 2} \small\textit{Errors and apparent orders of convergence for Example 1 with $N=40$\\ and $80$ for $\tau=0.25$ and $1.0$} \\\\
+	\normalsize
+	\begin{tabular}{r||rrr|rrr}
+			     &             &$\tau = 0.25$		  &	 	  	 &             &$\tau = 1.0$    	&		  \\
 		\hline
-		  t        &e\_40        &e\_80        &p\_80        &e\_40        &e\_80        &p\_80 \\ 
+		$t$  &$\epsilon_{40}$  &$\epsilon_{80}$  &$\rho_{80}$  &$\epsilon_{40}$  &$\epsilon_{80}$  &$\rho_{80}$ \\ 
 		\hline
 		0.2    &1.954E-05    &6.513E-07         &4.91    &4.940E-03    &2.792E-03         &0.82 \\ 
 		0.4    &4.151E-07    &1.258E-07         &1.72    &1.344E-03    &1.060E-03         &0.34 \\ 
@@ -76,10 +88,14 @@ sheen03} as well as learn new material in the field of numerical solutions to PD
 		2.0    &6.075E-09    &5.829E-16        &23.31    &3.676E-07    &1.596E-07         &1.20 \\ 
 		3.0    &2.355E-08    &2.318E-15        &23.28    &3.466E-09    &1.814E-09         &0.93 \\ 
 		4.0    &7.010E-08    &6.994E-15        &23.26    &6.142E-10    &3.219E-11         &4.25 \\ 
+		\hline
 	\end{tabular}
 	
-	\begin{tabular}{r|rrrrrrr}
-		  t        &e\_10        &e\_20        &p\_20        &e\_40        &p\_40        &e\_80        &p\_80 \\ 
+	\subsubsection*{Table 3} \small\textit{Error and apparent order of convergence for Example 2 with $N=20$ and\\$m=10,20,40$, and $80$ for $\tau=0.5$} \\\\
+	\normalsize
+	\begin{tabular}{r||rrrrrrr}
+		\hline
+		$t$  &$\epsilon_{10}$  &$\epsilon_{20}$  &$\rho_{20}$  &$\epsilon_{40}$  &$\rho_{40}$  &$\epsilon_{80}$  &$\rho_{80}$ \\ 
 		\hline
 		0.2    &1.269E-02    &2.102E-02        &-0.73    &2.381E-02        &-0.18    &2.450E-02        &-0.04 \\ 
 		0.4    &2.140E-02    &8.455E-03         &1.34    &5.226E-03         &0.69    &4.416E-03         &0.24 \\ 
@@ -93,9 +109,13 @@ sheen03} as well as learn new material in the field of numerical solutions to PD
 		2.0    &4.468E-03    &1.114E-03         &2.00    &2.783E-04         &2.00    &6.958E-05         &2.00 \\ 
 		3.0    &3.091E-03    &7.691E-04         &2.01    &1.927E-04         &2.00    &4.823E-05         &2.00 \\ 
 		4.0    &1.825E-03    &4.533E-04         &2.01    &1.133E-04         &2.00    &2.854E-05         &1.99 \\ 
+		\hline
 	\end{tabular}
 	
-	\begin{tabular}{r|rr}
+	\subsubsection*{Table 4} \small\textit{Number of cores vs. runtime(in seconds) for $N=50,000$\\ and $m=250,000$} \\\\
+	\normalsize
+	\begin{tabular}{r||r|r}
+	\hline
 		Cores              &Sayers Lab                     &Mio \\ 
 	\hline
 		  1.0      &3661.0877999999998      &2245.8103000000001 \\ 
@@ -108,11 +128,17 @@ sheen03} as well as learn new material in the field of numerical solutions to PD
 		128.0                     &N/A      &21.293009999999999 \\ 
 		256.0                     &N/A      &16.503080000000001 \\ 
 		512.0                     &N/A      &23.166782000000001 \\ 
+		\hline
 	\end{tabular}
 	
+	\subsubsection*{Plot 1} \small\textit{Plot of Table $4$ data $(lg(cores)$ vs. $lg(runtime))$} \\
+	\normalsize
 	\includegraphics[width=.75\linewidth]{ProjectFiles/results/plots/coresVtime.png}
 	
-	\begin{tabular}{r|rr}
+	\subsubsection*{Table 5} \small\textit{Number of cores vs. speedup for $N=50,000$ and $m=250,000$} \\\\
+	\normalsize
+	\begin{tabular}{r||r|r}
+	\hline
   Cores              &Sayers Lab                     &Mio \\ 
 	\hline
 		  1.0                     &1.0                     &1.0 \\ 
@@ -125,11 +151,17 @@ sheen03} as well as learn new material in the field of numerical solutions to PD
 		128.0                     &N/A      &105.47171583538449 \\ 
 		256.0                     &N/A      &136.08431274646915 \\ 
 		512.0                     &N/A      &96.940969185966352 \\ 
+		\hline
 	\end{tabular}
 	
+	\subsubsection*{Plot 2} \small\textit{Plot of Table $5$ data $(lg(cores)$ vs. $lg(speedup))$} \\
+	\normalsize
 	\includegraphics[width=.75\linewidth]{ProjectFiles/results/plots/coresVspeedup.png}
 	
-	\begin{tabular}{r|rr}
+	\subsubsection*{Table 6} \small\textit{Number of cores vs. efficiency for $N=50,000$ and $m=250,000$} \\\\
+	\normalsize
+	\begin{tabular}{r||r|r}
+	\hline
 		Cores              &Sayers Lab                     &Mio \\ 
 	\hline
 		  1.0                     &1.0                     &1.0 \\ 
@@ -142,11 +174,17 @@ sheen03} as well as learn new material in the field of numerical solutions to PD
 		128.0                     &N/A      &0.8239977799639413 \\ 
 		256.0                     &N/A     &0.53157934666589512 \\ 
 		512.0                     &N/A     &0.18933783044134053 \\ 
+		\hline
 	\end{tabular}
 	
+	\subsubsection*{Plot 3} \small\textit{Plot of Table $6$ data $(lg(cores)$ vs. efficiency$)$} \\
+	\normalsize
 	\includegraphics[width=.75\linewidth]{ProjectFiles/results/plots/coresVefficiency.png}
 	
-	\begin{tabular}{r|rr}
+	\subsubsection*{Table 7} \small\textit{Number of cores vs. experimental serial fraction of the code for\\ $N=50,000$ and $m=250,000$} \\\\
+	\normalsize
+	\begin{tabular}{r||r|r}
+	\hline
 		Cores              &Sayers Lab                     &Mio \\ 
 	\hline
 		  2.0    &0.047923297551072164    &0.053191001929236759 \\ 
@@ -158,8 +196,11 @@ sheen03} as well as learn new material in the field of numerical solutions to PD
 		128.0                     &N/A   &0.0016818543519778373 \\ 
 		256.0                     &N/A   &0.0034556341402023306 \\ 
 		512.0                     &N/A   &0.0083787958735268026 \\ 
+		\hline
 	\end{tabular}
 	
+	\subsubsection*{Plot 4} \small\textit{Plot of Table $7$ data $(lg(cores)$ vs. experimental serial fraction of the code$)$} \\
+	\normalsize
 	\includegraphics[width=.75\linewidth]{ProjectFiles/results/plots/coresVexpserialfrac.png}
 	
 	\begin{thebibliography}{1}
@@ -170,5 +211,18 @@ sheen03} as well as learn new material in the field of numerical solutions to PD
 			269-299
 			
 	\end{thebibliography}
+	
+	 % nice mathy stuff for our presentation
+ 
+ $$U_{N,\tau}(t)=2\text{Re}\left(\frac{1}{N\tau}\sum_{j=0}^{N-1}{}^\prime \tilde{\mu_j}\e^{z_jt}w(z_j)\right)$$
+ $$(zI+A)w(z)=u_0+\hat{f}(z)$$
+ $$u_t+Au=f(t),\hspace{4mm}\text{for }t>0,\hspace{4mm}\text{with }u(0)=u_0$$
+ $$u_t-u_{xx}=f(x,t),\hspace{4mm}\text{for }0<x<\pi,\;t>0,$$
+ $$u(x,t)=0\hspace{4mm}\text{for }x=0\text{ and }\pi,\;t>0,\hspace{4mm}\text{with }u(x,0)=u_0(x),\hspace{4mm}\text{for }0<x<\pi$$
+ $$u(x,t)=(1+t)\e^{-t}\sin(x)+\cos(t)\e^{-2t}\sin(2x)$$
+ $$u_0(x)=\sin(x)+\sin(2x)$$
+ $$\hat{f}(x,z)=\frac{1}{1+z}\sin(x)+\frac{2z+3}{(z+2)^2+1}\sin(2x)$$
+ 
+ % end nice mathy stuff
 
 \end{document}
