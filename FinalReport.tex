@@ -1,0 +1,53 @@
+% Kyle Geyser
+% 10/4/12
+
+\documentclass[letterpaper, 12pt]{article}
+
+\usepackage[top=2.5cm, bottom=2.5cm, left=2cm, right=2cm]{geometry}
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+
+\def\e{\text{e}}
+
+\title{Solving parabolic PDEs in parallel via time discretization using Laplace transforms}
+\author{Kyle Geyser and Dylan Denning}
+\date{\today}
+
+\begin{document}
+ \maketitle
+ 
+ % nice mathy stuff for our presentation
+ 
+ $$U_{N,\tau}(t)=2\text{Re}\left(\frac{1}{N\tau}\sum_{j=0}^{N-1}{}^\prime \tilde{\mu_j}\e^{z_jt}w(z_j)\right)$$
+ $$(zI+A)w(z)=u_0+\hat{f}(z)$$
+ $$u_t+Au=f(t),\hspace{4mm}\text{for }t>0,\hspace{4mm}\text{with }u(0)=u_0$$
+ $$u_t-u_{xx}=f(x,t),\hspace{4mm}\text{for }0<x<\pi,\;t>0,$$
+ $$u(x,t)=0\hspace{4mm}\text{for }x=0\text{ and }\pi,\;t>0,\hspace{4mm}\text{with }u(x,0)=u_0(x),\hspace{4mm}\text{for }0<x<\pi$$
+ $$u(x,t)=(1+t)\e^{-t}\sin(x)+\cos(t)\e^{-2t}\sin(2x)$$
+ $$u_0(x)=\sin(x)+\sin(2x)$$
+ $$\hat{f}(x,z)=\frac{1}{1+z}\sin(x)+\frac{2z+3}{(z+2)^2+1}\sin(2x)$$
+ 
+ % end nice mathy stuff
+	
+	\section*{Summary}
+	\hspace{5mm} In a normal space-time setting, partial differential equations can be impossible to solve using parallel methods. For each unit of time, the unknown function relies on the values at previous times. Given a parabolic PDE, one can transform the problem into many discrete, space-frequency problems, independent of one another. Following this transformation, parallel methods can be applied to solving the problem with high speed and accuracy. The methods used in this project can be applied to many fields involving differential equations in time, reducing the time needed to solve problems which previously could only be solved with a serial mentality.
+	
+	\section*{Project Description}
+	\subsection*{Aims and Background}
+	\hspace{5mm} The aim of this project is to produce a working program for numerically approximating solutions to space-time differntial equations. We will use a Laplace transform to transform the problem from temporal space into a frequency space. Aiding us in our research and development of this project is an article\cite{sheen03} written in the IMA Journal of Numerical Analysis on the subject matter. We will attempt to replicate the results gained by the authors in this article.
+	
+	\subsection*{Approach and Methodology}
+	\hspace{5mm} We will begin our studies with producing a working serial version of the algorithm for ordinary differential equations with known solutions, with which we can then compare computed results. Following successful completion of said serial algorithm, we will make the necessary adjustments as to allow for partial differential equation computations, still performing all computations in serial. Once a fully working serial version of the code is completed, we will proceed to parallelize the algorithm to produce our intended final result. By approaching the problem with this methodology, we can work in steps in which we feel comfortable. Between each step, should we need outside guidance, we can approach Dr. Ganesh with any problems we are having, while still showing that we are making progress toward a final production. Throughout the time spent working through these milestones, we can further our knowledge on the subject matter by continuing to digest more of the material in the provided article\cite{sheen03} as well as learn new material in the field of numerical solutions to PDEs through Dr. Ganesh's private lectures.
+	
+	\subsection*{Expected Outcome}
+	\hspace{5mm} Since we are replicating the process in the article by Sheen, Sloan, and Thom\'{e}e, we expect to get the same results the authors show in section 6 (Numerical examples) in their paper.\cite{sheen03}
+	
+	\begin{thebibliography}{1}
+		\bibitem{sheen03}
+			Dongwoo Sheen, Ian H. Sloan, and Vidar Thom\'{e}e,
+			\emph{A parallel method for time discretization of parabolic equations based on Laplace transformation and quadrature}.
+			IMA Journal of Numerical Analysis (2003) 23,
+			269-299
+			
+	\end{thebibliography}
+
+\end{document}
