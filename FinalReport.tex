@@ -22,31 +22,102 @@
 		\vspace{3cm}
  
 		\begin{abstract}
-			For this project, we will outline a method to solve inhomogeneous parabolic partial differential equations in parallel. This will be accomplished by removing the time dependence of the equations by transforming the problem into a differential equation in the space-frequency setting through a Laplace transformation. For each discrete frequency, an independent spatial problem exists which can be solved with a finite difference method for numerically approximating solutions to differential equations. Due to the independence of the spatial problems, many problems can be solved at the same time in a parallel environment. This paper will further explain the details required to produce accurate results for such problems.
+			For this project, we will outline a method to solve inhomogeneous parabolic partial differential equations in parallel. This will be accomplished by removing the time dependence of the equations by transforming the problem into a differential equation in the space-frequency setting through a Laplace transformation. For each discrete frequency, an independent spatial problem exists which can be solved with a finite difference method for numerically approximating solutions to differential equations. Due to the independence of the spatial problems, many problems can be solved at the same time in a parallel environment. This paper will further explain the details required to produce accurate results for such problems. Note that all information presented in this paper is based on and intended to replicate results from the paper by Dongwoo Sheen, Ian H. Sloan, and Vidar Thom\'{e}e \cite{sheen03}.  
 		\end{abstract}
 	\end{titlepage}
 	
 	\section*{Problem Description}
 		The problems we will consider are of the form
-		$$u_t+Au=f(t),\hspace{4mm}\text{for }t>0,\hspace{4mm}\text{with }u(0)=u_0$$ \\
+		$$u_t+Au=f(t),\hspace{4mm}\text{for }t>0,\hspace{4mm}\text{with }u(0)=u_0,$$
 		where $A$ is the second-order differential operator ($\nabla^2$) with Dirichlet boundary conditions and $u_0$ and $f(t)$ are given.
 		Note: all functions above have implied spatial terms based on the dimensionality of the problem
 
 	\section*{Approach}
+		\subsection*{Setup}
 		To remove the time dependece of the problem, we transform the equation with a Laplace transform defined by
-		$$w(z):=\L\{u\}=\hat{u}(z)=\int_0^\infty\e^{-zt}u(t)\d t$$
+		$$w(z):=\L\{u\}=\hat{u}(z)=\int_0^\infty\e^{-zt}u(t)\d t.$$
 		To get a solution for $u$, we must take an inverse Laplace transform of $w$ defined by
-		$$u(t)=\frac{1}{2\pi\i}\int_\Gamma\e^{zt}w(z)\d z$$	
+		\begin{equation}\label{inv}
+			u(t)=\frac{1}{2\pi\i}\int_\Gamma\e^{zt}w(z)\d z,	
+		\end{equation}	
 		where $\Gamma$ is a deformed contour in the complex plane, assuming $w(z)$ can be continued analytically. 
-		$$\Gamma=\{z:z=\varphi(y)+\i\sigma y, y\in\R, y\text{ increasing}\}\subset S, S=\{z\in\C:|\arg z|<\delta, z\neq 0\}, \delta\in(\pi/2,\pi)$$
+		$$\Gamma=\{z:z=\varphi(y)+\i\sigma y, y\in\R, y\text{ increasing}\},$$
+		with
+		$$\varphi(y)=\gamma-\sqrt{y^2+\nu^2},\;y\in\R,\;\gamma,\nu,\sigma\text{ chosen real parameters with }\nu>0.$$\\
+		The transformed equation becomes
+		\begin{equation}\label{ode}
+			(zI+A)w(z)=u_0+\hat{f}(z).
+		\end{equation}
 		
-	\section*{Approach and Methodology}
-	\hspace{5mm} We will begin our studies with producing a working serial version of the algorithm for ordinary differential equations with known solutions, with which we can then compare computed results. Following successful completion of said serial algorithm, we will make the necessary adjustments as to allow for partial differential equation computations, still performing all computations in serial. Once a fully working serial version of the code is completed, we will proceed to parallelize the algorithm to produce our intended final result. By approaching the problem with this methodology, we can work in steps in which we feel comfortable. Between each step, should we need outside guidance, we can approach Dr. Ganesh with any problems we are having, while still showing that we are making progress toward a final production. Throughout the time spent working through these milestones, we can further our knowledge on the subject matter by continuing to digest more of the material in the provided article\cite{sheen03} as well as learn new material in the field of numerical solutions to PDEs through Dr. Ganesh's private lectures.
-	
-	\subsection*{Expected Outcome}
-	\hspace{5mm} Since we are replicating the process in the article by Sheen, Sloan, and Thom\'{e}e, we expect to get the same results the authors show in section 6 (Numerical examples) in their paper.\cite{sheen03}
-	
-	\subsection*{Tables and Plots}
+		\subsection*{Finite Difference Method}
+		$w(z)$ can now be approximated using the finite difference method. An example of the method in one dimension is as follows:
+		\begin{itemize}
+		\renewcommand{\labelitemi}{--}
+			\item Select a granularity of the approximation, $m$.
+			\item Write $A$ as the $m-1\times m-1$ discrete Laplacian given by:
+				$$A=\begin{bmatrix}
+				2 & -1 & 0 & 0 & \cdots & \cdots & \cdots\\
+				-1 & 2 & -1 & 0 & 0 & \cdots & \cdots \\
+				0 & -1 & 2 & -1 & 0 & 0 & \cdots \\
+				\vdots & & & \ddots & & & \vdots \\
+				\vdots & & & & \ddots & & \vdots \\
+				0 & 0 & \cdots & \cdots & -1 & 2 & -1 \\
+				0 & 0 & \cdots & \cdots &\cdots & -1 & 2
+				\end{bmatrix}$$
+			\item Solve the $m-1\times m-1$ linear system associated with \eqref{ode}
+				$$\frac{1}{h^2}(zI+A)w(z)=g(z),$$
+				where
+				$$g(z)=\vec{u_0}+\vec{\hat{f}}(z)+\frac{1}{h^2}
+				\begin{bmatrix}
+					\alpha \\
+					0 \\
+					0 \\
+					\vdots \\
+					\beta
+				\end{bmatrix},$$ \\
+				with
+				$$h=\frac{b-a}{m},\; a\text{ and } b\text{ the endpoints of our domain},\;\alpha=u(a),\;\beta=u(b),$$
+				and
+				$\vec{u_0}+\vec{\hat{f}}(z)$ vectors of size $m-1$ containing $u_0$ and $\hat{f}(z)$ evaluated at $x_i=a+ih,\\i=1,2,...,m-1$.
+		\end{itemize}
+		
+		\subsection*{Quadrature}
+		Now that we have an approximation for $w(z)$, we can approximate the integral in \eqref{inv} using a quadrature rule, specifically a trapezoidal rule in this project. Since the trapezoidal rule requires a finite interval, we first transform the infinite contour integral in \eqref{inv} into an infinite real integral, then map that into the finite interval $(-1,1)$ with the following steps:
+		\begin{itemize}
+		\renewcommand{\labelitemi}{--}
+			\item Represent \eqref{inv} as
+			$$u(t)=\int_{-\infty}^\infty v(t,y)\d y,\text{ with }v(t,y)=\frac{1}{2\pi\i}\e^{z(y)t}w(z(y))z'(y),\;z(y):=\varphi(y)+\i\sigma y.$$
+			\item Using the change of variables $y=y(\eta)=\tau^{-1}\chi(\eta)\text{, where }\chi(\eta)=\log((1+\eta)/(1-\eta)),\\\tau$ a chosen positive time-scaling parameter, 
+			$$\int_{-\infty}^\infty v(t,y)\d y=\int_{-1}^1V(\eta)\d\eta\text{, where }V(\eta)=v(y(\eta))y'(\eta).$$  
+		\end{itemize}
+		$\displaystyle \int_{-1}^1V(\eta)\d\eta$ can be approximated with a trapezoid rule given by
+		$$Q_{N,\tau}(v)=\frac{1}{N}\sum_{j=-N+1}^{N-1}V(\eta_j)=\frac{1}{N\tau}\sum_{j=-N+1}^{N-1}\mu_jv(y_j),$$
+		where
+		$$\eta_j=j/N,\;\mu_j=\chi'(\eta_j)=2/(1-\eta_j^2),\;y_j=y(\eta_j)=\tau^{-1}\chi(\eta_j).$$\\
+		Writing the sum in terms of $w$, we get
+		\begin{equation}\label{sum}
+			U_{N,\tau}(t)=Q_{N,\tau}(v(t,y))=\frac{1}{N\tau}\sum_{j=-N+1}^{N-1}\tilde{\mu_j}\e^{z_jt}w(z_j),\;\tilde{\mu_j}=\frac{1}{2\pi\i}z'(y_j)\mu_j,\;z_j=z(y_j).
+		\end{equation}
+		Due to the symmetric nature of the contour ($\varphi$ is an even function), we can rewrite \eqref{sum} as
+		$$U_{N,\tau}(t)=2\text{Re}\left(\frac{1}{N\tau}\sum_{j=0}^{N-1}{}^\prime \tilde{\mu_j}\e^{z_jt}w(z_j)\right),$$
+		where the ${}^\prime$ denotes that the zeroth term of the series is halved. \\\\
+		$U_{N,\tau}(t)$, then, is a vector of length $m-1$ approximating $u(t)$ at $x_i=a+ih,\;i=1,2,...,m-1$ ($a$ and $h$ described above).
+		
+		\subsection*{Parallelization}
+		We parallelized the final sum using MPI. Specifically, each core, except the first and last cores, computes a local sum corresponding to $\frac{N-1}{P}$ quadrature points, where $P$ is the number of processors used. The first core computes the first term in the full sum, and adds to that a local sum corresponding to $\frac{N-1}{P}$ quadrature points. The last core computes a local sum corresponding to $\frac{N-1}{P}+\text{Mod}(N-1, P)$ quadrature points. We then use \texttt{MPI\_Reduce} with the \texttt{master} core to reduce the local sums into a full sum. \\\\
+		Starting and finishing indices in the sum are calculated for each processor as follows, with the processor's id $\in[0,P-1]$ denoted as \texttt{my\_rank}:
+		\begin{itemize}
+		\renewcommand{\labelitemi}{--}
+			\item $\text{start}=(\texttt{my\_rank}*(N-1))/P+1$
+			\item $\text{finish}=((\texttt{my\_rank}+1)*(N-1))/P$
+		\end{itemize}
+		Note: The division in the above equations is integer division.
+		
+	\section*{Examples}
+		\subsection*{Example 1}
+		The first example that we looked at is an ordinary differential equation in time (zero dimensions in space). We tested our program on this equation to make sure the approximate inverse Laplace transform section of our code worked properly before moving on to higher dimensional problems. The equation we looked at is
+		$$u'+u=\e^{-2t},\hspace{4mm}\text{with }u(0)=0,$$
+		which has the exact solution (can be found analytically) $u(t)=\e^{-t}+\e^{-2t}$. The Laplace transformed problem (also can be found analytically) is $(z+1)w(z)=(z+2)^{-1}$, giving $w(z)=((z+1)(z+2))^{-1}$.	Using parameter values of $\gamma=0.5$ and $\nu=0.5$, as chosen in the referenced paper \cite{sheen03}, and the known function $w(z)$, we ran our code for various values of $t$ and $\tau$ and compared our results with the known solution for $u(t)$. Our results are shown in the tables below. Note that for Tables 1 through 3, $\epsilon_N$ denotes the error at the listed value of $t$ and $\rho_N=\log_2(\epsilon_{N/2}/\epsilon_N)$.
 	
 	\subsubsection*{Table 1} \small\textit{Error and apparent order of convergence for Example 1 with $N=10,20,40$,\\ and $80$ for $\tau=0.5$} \\\\
 	\normalsize
@@ -89,7 +160,23 @@
 		3.0    &2.355E-08    &2.318E-15        &23.28    &3.466E-09    &1.814E-09         &0.93 \\ 
 		4.0    &7.010E-08    &6.994E-15        &23.26    &6.142E-10    &3.219E-11         &4.25 \\ 
 		\hline
-	\end{tabular}
+	\end{tabular}\\
+	
+	We can see from these tables that the approximate inverse Laplace transform used for this project is accurate (low values of $\epsilon$) and converges quickly with respect to $N$ (high values of $\rho$).
+	
+	\subsection*{Example 2}
+	The second equation that we looked at was a partial differential equation with one dimension of space and one dimension of time given by
+	$$u_t-u_{xx}=f(x,t),\hspace{4mm}\text{for }0<x<\pi,\;t>0,$$
+ 	$$u(x,t)=0\hspace{4mm}\text{for }x=0\text{ and }\pi,\;t>0,\hspace{4mm}\text{with }u(x,0)=u_0(x),\hspace{4mm}\text{for }0<x<\pi,$$
+ 	where
+ 	$$f(x,t)=\e^{-t}\sin(x)+\e^{-2t}(2\cos(t)-\sin(t))\sin(2x),$$
+ 	and
+ 	$$u_0(x)=\sin(x)+\sin(2x),$$
+ 	which are chosen such that the exact solution (used to compare approximate results) is
+ 	$$u(x,t)=(1+t)\e^{-t}\sin(x)+\cos(t)\e^{-2t}\sin(2x).$$
+ 	The Laplace transform of $f$ is given by
+ 	$$\hat{f}(x,z)=\frac{1}{1+z}\sin(x)+\frac{2z+3}{(z+2)^2+1}\sin(2x).$$
+ 	Solving this problem required implementing the full algorithm described in the section \textit{Approach}, and the results we obtained can be seen in the following table. The parameters chosen for this problem are the same as in Example 1. Note that the error in the inverse Laplace transform approximation with $N=20$ is negligible compared to the error in the finite difference method for approximating $w(z)$. 
 	
 	\subsubsection*{Table 3} \small\textit{Error and apparent order of convergence for Example 2 with $N=20$ and\\$m=10,20,40$, and $80$ for $\tau=0.5$} \\\\
 	\normalsize
@@ -110,9 +197,25 @@
 		3.0    &3.091E-03    &7.691E-04         &2.01    &1.927E-04         &2.00    &4.823E-05         &2.00 \\ 
 		4.0    &1.825E-03    &4.533E-04         &2.01    &1.133E-04         &2.00    &2.854E-05         &1.99 \\ 
 		\hline
-	\end{tabular}
+	\end{tabular}\\
 	
-	\subsubsection*{Table 4} \small\textit{Number of cores vs. runtime(in seconds) for $N=50,000$\\ and $m=250,000$} \\\\
+	We can see from this table the convergence of the finite difference method approaching $O(h^2)$ (since $h$ is proportional to $1/m$), and although the results are not as accurate as just using the inverse Laplace approximation with a known function for $w(z)$, the error does appear to tend towards zero as $m$ increases. The following surface plots show our approximate results with the actual solution for varying values of $N$ and $m$ to help visualize the rates of convergence. \\\vspace{5cm}
+	
+	\includegraphics[trim = 6.5cm 1cm 6cm 2cm, width=\linewidth]{ProjectFiles/results/plots/n2m76.png} \\\vspace{2cm}
+	\includegraphics[trim = 6.5cm 3cm 6cm 2cm, width=\linewidth]{ProjectFiles/results/plots/n3m76.png} \\\vspace{2cm}
+	\includegraphics[trim = 6.5cm 3cm 6cm 2cm, width=\linewidth]{ProjectFiles/results/plots/n4m76.png} \\\vspace{2cm}
+	\includegraphics[trim = 6.5cm 3cm 6cm 2cm, width=\linewidth]{ProjectFiles/results/plots/n5m76.png} \\\vspace{2cm}
+	\includegraphics[trim = 6.5cm 3cm 6cm 2cm, width=\linewidth]{ProjectFiles/results/plots/n6m76.png} \\\vspace{2cm}
+	\includegraphics[trim = 6.5cm 3cm 6cm 2cm, width=\linewidth]{ProjectFiles/results/plots/n12m76.png} \\\vspace{2cm}
+	\includegraphics[trim = 6.5cm 3cm 6cm 2cm, width=\linewidth]{ProjectFiles/results/plots/n20m3.png} \\\vspace{2cm}
+	\includegraphics[trim = 6.5cm 3cm 6cm 2cm, width=\linewidth]{ProjectFiles/results/plots/n20m6.png} \\\vspace{2cm}
+	\includegraphics[trim = 6.5cm 3cm 6cm 2cm, width=\linewidth]{ProjectFiles/results/plots/n20m12.png} \\\vspace{2cm}
+	\includegraphics[trim = 6.5cm 3cm 6cm 2cm, width=\linewidth]{ProjectFiles/results/plots/n20m24.png} 
+	
+	\section*{Parallel Performance Analysis}
+	The following tables and plots outline our parallel performance results for varying numbers of cores on both Mio and the Sayers Lab machines. Note that lg$(x)$ is our notation for $\log_2(x)$.
+	
+	\subsection*{Table 4} \small\textit{Number of cores vs. runtime(in seconds) for $N=50,000$\\ and $m=250,000$} \\\\
 	\normalsize
 	\begin{tabular}{r||r|r}
 	\hline
@@ -131,11 +234,12 @@
 		\hline
 	\end{tabular}
 	
-	\subsubsection*{Plot 1} \small\textit{Plot of Table $4$ data $(lg(cores)$ vs. $lg(runtime))$} \\
+	\subsection*{Plot 1} \small\textit{Plot of Table $4$ data $(lg(cores)$ vs. $lg(runtime))$} \\
 	\normalsize
-	\includegraphics[width=.75\linewidth]{ProjectFiles/results/plots/coresVtime.png}
+	\includegraphics[width=.75\linewidth]{ProjectFiles/results/plots/coresVtime.png} \\
+	Table 4 and Plot 1 show a clear linear correlation between number of processors and runtime on both Mio and Sayers Lab, up until 128 cores (on Mio). 256 cores still runs faster than 128 but the relative speedup is much less than that between lower numbers of cores. By 512 cores, the runtime actually begins to increase, suggesting a dominance of serial related processes, most likely communication beween processors. It is interesting to see that Mio is consistently faster than Sayers Lab for any number of course (of those tested). This is most likely due to the slightly better processors and much faster communication time between processors on Mio.
 	
-	\subsubsection*{Table 5} \small\textit{Number of cores vs. speedup for $N=50,000$ and $m=250,000$} \\\\
+	\subsection*{Table 5} \small\textit{Number of cores vs. speedup for $N=50,000$ and $m=250,000$} \\\\
 	\normalsize
 	\begin{tabular}{r||r|r}
 	\hline
@@ -154,11 +258,12 @@
 		\hline
 	\end{tabular}
 	
-	\subsubsection*{Plot 2} \small\textit{Plot of Table $5$ data $(lg(cores)$ vs. $lg(speedup))$} \\
+	\subsection*{Plot 2} \small\textit{Plot of Table $5$ data $(lg(cores)$ vs. $lg(speedup))$} \\
 	\normalsize
-	\includegraphics[width=.75\linewidth]{ProjectFiles/results/plots/coresVspeedup.png}
+	\includegraphics[width=.75\linewidth]{ProjectFiles/results/plots/coresVspeedup.png} \\
+	Although Mio ran faster than Sayers Lab for every tested number of cores, the speedup data presented in Table 5 and Plot 2 is nearly identical for the two. For unknown reasons, Sayers Lab got incredible speedup for eight cores. As expected, Mio began to show better results in terms of speedup as the number of cores got large, most likely due to its superior InfiniBand connection. Even so, both machines showed linear speedup up to 64 cores on Sayers Lab and 128 cores on Mio.
 	
-	\subsubsection*{Table 6} \small\textit{Number of cores vs. efficiency for $N=50,000$ and $m=250,000$} \\\\
+	\subsection*{Table 6} \small\textit{Number of cores vs. efficiency for $N=50,000$ and $m=250,000$} \\\\
 	\normalsize
 	\begin{tabular}{r||r|r}
 	\hline
@@ -177,11 +282,11 @@
 		\hline
 	\end{tabular}
 	
-	\subsubsection*{Plot 3} \small\textit{Plot of Table $6$ data $(lg(cores)$ vs. efficiency$)$} \\
+	\subsection*{Plot 3} \small\textit{Plot of Table $6$ data $(lg(cores)$ vs. efficiency$)$} \\
 	\normalsize
 	\includegraphics[width=.75\linewidth]{ProjectFiles/results/plots/coresVefficiency.png}
 	
-	\subsubsection*{Table 7} \small\textit{Number of cores vs. experimental serial fraction of the code for\\ $N=50,000$ and $m=250,000$} \\\\
+	\subsection*{Table 7} \small\textit{Number of cores vs. experimental serial fraction of the code for\\ $N=50,000$ and $m=250,000$} \\\\
 	\normalsize
 	\begin{tabular}{r||r|r}
 	\hline
@@ -199,7 +304,7 @@
 		\hline
 	\end{tabular}
 	
-	\subsubsection*{Plot 4} \small\textit{Plot of Table $7$ data $(lg(cores)$ vs. experimental serial fraction of the code$)$} \\
+	\subsection*{Plot 4} \small\textit{Plot of Table $7$ data $(lg(cores)$ vs. experimental serial fraction of the code$)$} \\
 	\normalsize
 	\includegraphics[width=.75\linewidth]{ProjectFiles/results/plots/coresVexpserialfrac.png}
 	
@@ -212,17 +317,4 @@
 			
 	\end{thebibliography}
 	
-	 % nice mathy stuff for our presentation
- 
- $$U_{N,\tau}(t)=2\text{Re}\left(\frac{1}{N\tau}\sum_{j=0}^{N-1}{}^\prime \tilde{\mu_j}\e^{z_jt}w(z_j)\right)$$
- $$(zI+A)w(z)=u_0+\hat{f}(z)$$
- $$u_t+Au=f(t),\hspace{4mm}\text{for }t>0,\hspace{4mm}\text{with }u(0)=u_0$$
- $$u_t-u_{xx}=f(x,t),\hspace{4mm}\text{for }0<x<\pi,\;t>0,$$
- $$u(x,t)=0\hspace{4mm}\text{for }x=0\text{ and }\pi,\;t>0,\hspace{4mm}\text{with }u(x,0)=u_0(x),\hspace{4mm}\text{for }0<x<\pi$$
- $$u(x,t)=(1+t)\e^{-t}\sin(x)+\cos(t)\e^{-2t}\sin(2x)$$
- $$u_0(x)=\sin(x)+\sin(2x)$$
- $$\hat{f}(x,z)=\frac{1}{1+z}\sin(x)+\frac{2z+3}{(z+2)^2+1}\sin(2x)$$
- 
- % end nice mathy stuff
-
 \end{document}
