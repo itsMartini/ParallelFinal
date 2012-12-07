@@ -26,13 +26,12 @@ nodes and cores per node you would like to use, then type
 
       qsub my_project.pbs
 
-Note: for all of the above executions, the parameters N and m are read from a 
+Note: for parallel performance testing, the parameters N and m are read from a 
 file named config.txt (in that order). Modify this text file as necessary to 
 change N and m.
 
-To generate the plots shown in the report, edit the file plots.py and uncomment any
-commented out lines in the appropriate block (each block has a header describing its
-purpose). To run the python script, either type
+To generate the plots shown in the report, run the python script plots.py either
+by typing
 
       python plots.py
 
@@ -41,6 +40,14 @@ or type
       chmod u+x plots.py
 then
       ./plots.py 
+
+Note: mencoder must be installed to generate the movie (comment out appropriate lines
+to ignore movie creation)
+
+To clean the directory of all mod files, executables, auto-generated backup files,
+etc., type
+
+      make clean
 ------------------------------------------------------------------------------------
 Detailed information on the project and our implementation of various algorithms can 
 be found in the file FinalReport.pdf.
@@ -56,3 +63,4 @@ file of an animation. results/tables/ is an empty directory used for storing for
 output for LaTeX code.
 
 Output of tables and runtimes upon running of the code will appear in results/.
+Runtime data is appended to results/runtimes.txt.
